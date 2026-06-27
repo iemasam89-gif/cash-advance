@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة العهد المالية</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #1e3a5f; --primary-dark: #142940; --primary-light: #2c5282;
+  --accent: #2b8a3e; --accent-dark: #1f6b30; --danger: #c0392b; --danger-dark: #962d22;
+  --bg: #f4f6f9; --card-bg: #ffffff; --border: #dfe3e8; --text: #2d3436; --text-muted: #6b7280;
+  --radius: 10px; --shadow: 0 2px 8px rgba(0,0,0,0.06); --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+}
+body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text); direction: rtl; line-height: 1.6; }
+.login-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); padding: 20px; }
+.login-box { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 40px 36px; width: 100%; max-width: 400px; }
+.login-box .logo { text-align: center; font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+.login-box .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 28px; font-size: 0.95rem; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: var(--text); }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 0.95rem; font-family: inherit; transition: border-color 0.2s, box-shadow 0.2s; background: #fff; color: var(--text);
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.12);
+}
+.form-row { display: flex; gap: 14px; }
+.form-row .form-group { flex: 1; }
+.btn { display: inline-block; padding: 11px 22px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; text-align: center; font-family: inherit; }
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-light); }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: var(--accent-dark); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: var(--danger-dark); }
+.btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
+.btn-outline:hover { background: var(--primary); color: #fff; }
+.btn-block { width: 100%; }
+.btn-sm { padding: 6px 14px; font-size: 0.85rem; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; }
+.alert-error { background: #fdecea; color: var(--danger-dark); border: 1px solid #f5c6c2; }
+.alert-success { background: #e9f7ef; color: var(--accent-dark); border: 1px solid #b7e4c7; }
+.alert-info { background: #eaf2f8; color: var(--primary-dark); border: 1px solid #bcd6ec; }
+.app-header { background: var(--primary); color: #fff; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
+.app-header .brand { font-size: 1.2rem; font-weight: 700; }
+.app-header .user-info { display: flex; align-items: center; gap: 16px; font-size: 0.9rem; flex-wrap: wrap; }
+.app-header .user-info .role-badge { background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; }
+.container { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+.page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 22px; color: var(--primary-dark); }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: var(--card-bg); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); border-right: 4px solid var(--primary); }
+.stat-card.accent { border-right-color: var(--accent); }
+.stat-card.danger { border-right-color: var(--danger); }
+.stat-card .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
+.stat-card .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--primary-dark); }
+.card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-bottom: 22px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+.card-header h2, .card-header h3 { color: var(--primary-dark); font-size: 1.15rem; }
+table { width: 100%; border-collapse: collapse; }
+table th, table td { text-align: right; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+table th { background: #f8fafc; font-weight: 700; color: var(--text-muted); font-size: 0.85rem; }
+table tbody tr:hover { background: #fafbfc; }
+.table-wrapper { overflow-x: auto; }
+.text-muted { color: var(--text-muted); }
+.text-danger { color: var(--danger); font-weight: 600; }
+.text-accent { color: var(--accent); font-weight: 600; }
+.text-center { text-align: center; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 14px; font-size: 0.78rem; font-weight: 600; }
+.badge-active { background: #e9f7ef; color: var(--accent-dark); }
+.badge-inactive { background: #fdecea; color: var(--danger-dark); }
+.badge-role-admin { background: #fff3cd; color: #856404; }
+.badge-role-manager { background: #d6e9f8; color: var(--primary-dark); }
+.badge-role-branch { background: #e3f0e6; color: var(--accent-dark); }
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
+.tab-btn { background: none; border: none; padding: 10px 18px; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.2s; }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: #fff; border-radius: var(--radius); padding: 28px; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-box h3 { margin-bottom: 18px; color: var(--primary-dark); }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.gap-2 { display: flex; gap: 8px; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.loader { text-align: center; padding: 30px; color: var(--text-muted); }
+.view { display: none; }
+.view.active { display: block; }
+@media (max-width: 640px) {
+  .app-header { padding: 12px 16px; flex-direction: column; gap: 8px; }
+  .form-row { flex-direction: column; gap: 0; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .card-header { flex-direction: column; align-items: flex-start; }
+  table th, table td { padding: 8px 8px; font-size: 0.85rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="initialLoader" class="loader" style="padding-top:100px; font-size:1.1rem;">جاري تحميل النظام...</div>
+
+<!-- صندوق تشخيص الأخطاء - يظهر تلقائياً فقط إذا حدث خطأ -->
+<div id="debugBox" style="display:block; position:fixed; bottom:10px; left:10px; right:10px; background:#fdecea; border:2px solid #c0392b; border-radius:8px; padding:14px; font-family:monospace; font-size:0.75rem; color:#962d22; z-index:9999; max-height:35vh; overflow-y:auto; direction:ltr; text-align:left; white-space:pre-wrap;">جاري بدء التشخيص...
+</div>
+<script>
+function showDebug(msg) {
+  const box = document.getElementById('debugBox');
+  box.style.display = 'block';
+  box.textContent += msg + '\n\n';
+}
+window.addEventListener('error', function (e) {
+  showDebug('JS ERROR: ' + e.message + '\nFile: ' + e.filename + ' Line: ' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function (e) {
+  showDebug('PROMISE ERROR: ' + (e.reason && e.reason.message ? e.reason.message : e.reason) + (e.reason && e.reason.code ? '\nCode: ' + e.reason.code : ''));
+});
+</script>
+
+<div id="view-login" class="view">
+  <div class="login-wrapper">
+    <div class="login-box">
+      <div class="logo">نظام العهد المالية</div>
+      <div class="subtitle">سجّل الدخول للوصول إلى حسابك</div>
+      <div id="loginAlert"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">البريد الإلكتروني</label>
+          <input type="email" id="loginEmail" required autocomplete="username" placeholder="example@company.com">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">كلمة المرور</label>
+          <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">تسجيل الدخول</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="view-admin" class="view">
+  <div id="adminHeader"></div>
+  <div class="container">
+    <div class="flex-between" style="margin-bottom:22px; flex-wrap:wrap; gap:10px;">
+      <h1 class="page-title" style="margin-bottom:0;">إدارة المستخدمين</h1>
+      <button class="btn btn-accent" id="openCreateModalBtn">+ إنشاء حساب جديد</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">عدد المديرين العامين</div><div class="stat-value" id="statManagers">-</div></div>
+      <div class="stat-card accent"><div class="stat-label">عدد الفروع</div><div class="stat-value" id="statBranches">-</div></div>
+      <div class="stat-card"><div class="stat-label">إجمالي العهد الموزّعة</div><div class="stat-value" id="statTotalAdvance">-</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>كل الحسابات</h3></div>
+      <div id="usersAlert"></div>
+      <div id="usersTableWrapper" class="table-wrapper"><div class="loader">جاري التحميل...</div></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="createModal">
+    <div class="modal-box">
+      <h3>إنشاء حساب جديد</h3>
+      <div id="createAlert"></div>
+      <form id="createForm">
+        <div class="form-group">
+          <label>نوع الحساب</label>
+          <select id="role" required>
+            <option value="">اختر نوع الحساب</option>
+            <option value="general_manager">مدير عام</option>
+            <option value="branch">فرع</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>الاسم الكامل</label>
+          <input type="text" id="full_name" required placeholder="اسم الشخص المسؤول">
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="newEmail" required placeholder="example@company.com"></div>
+          <div class="form-group"><label>كلمة المرور</label><input type="text" id="newPassword" required minlength="6" placeholder="6 أحرف على الأقل"></div>
+        </div>
+        <div id="branchFields" style="display:none;">
+          <div class="form-group"><label>اسم الفرع</label><input type="text" id="branch_name" placeholder="مثال: فرع المعادي"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>المدير العام المسؤول (اختياري)</label>
+              <select id="manager_id"><option value="">بدون تحديد</option></select>
+            </div>
+            <div class="form-group"><label>قيمة العهدة الافتتاحية</label><input type="number" id="initial_advance" min="0" step="0.01" value="0"></div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="closeCreateModalBtn">إلغاء</button>
+          <button type="submit" class="btn btn-accent" id="createSubmitBtn">إنشاء الحساب</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <h3 id="editModalTitle">تعديل الحساب</h3>
+      <div id="editAlert"></div>
+      <form id="editForm">
+        <input type="hidden" id="editUserId">
+        <div class="form-group"><label>الاسم الكامل</label><input type="text" id="editFullName" required></div>
+        <div class="form-group" id="editBranchNameGroup" style="display:none;"><label>اسم الفرع</label><input type="text" id="editBranchName"></div>
+        <div class="form-group" id="editManagerGroup" style="display:none;">
+          <label>المدير العام المسؤول</label>
+          <select id="editManagerId"><option value="">بدون تحديد</option></select>
+        </div>
+        <div class="form-group">
+          <label>حالة الحساب</label>
+          <select id="editIsActive"><option value="true">مفعّل</option><option value="false">معطّل</option></select>
+        </div>
+        <div class="alert alert-info" style="margin-top:10px;">
+          لتغيير كلمة مرور أي مستخدم، استخدم رابط "نسيت كلمة المرور" من صفحة تسجيل الدخول — لا يمكن للأدمن تغييرها مباشرة من المتصفح لأسباب أمنية في Firebase.
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="closeEditModalBtn">إلغاء</button>
+          <button type="button" class="btn btn-danger" id="deleteUserBtn">حذف الحساب</button>
+          <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="view-manager" class="view">
+  <div id="managerHeader"></div>
+  <div class="container">
+    <div class="flex-between" style="margin-bottom:22px; flex-wrap:wrap; gap:10px;">
+      <h1 class="page-title" style="margin-bottom:0;">نظرة عامة على الفروع</h1>
+      <button class="btn btn-primary" id="exportAllBtn">⬇ تصدير تقرير مجمّع لكل الفروع</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">عدد الفروع</div><div class="stat-value" id="statBranchCount">-</div></div>
+      <div class="stat-card accent"><div class="stat-label">إجمالي العهد الحالية</div><div class="stat-value" id="statTotalBalance">-</div></div>
+      <div class="stat-card danger"><div class="stat-label">إجمالي المصروفات المسجّلة</div><div class="stat-value" id="statTotalExpenses">-</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>الفروع</h3></div>
+      <div id="branchesAlert"></div>
+      <div id="branchesTableWrapper" class="table-wrapper"><div class="loader">جاري التحميل...</div></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="branchDetailModal">
+    <div class="modal-box" style="max-width:680px;">
+      <h3 id="branchDetailTitle">تفاصيل الفرع</h3>
+      <div id="branchDetailAlert"></div>
+      <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom:18px;">
+        <div class="stat-card" style="padding:14px;"><div class="stat-label">رصيد العهدة الحالي</div><div class="stat-value" id="detailBalance" style="font-size:1.2rem;">-</div></div>
+        <div class="stat-card accent" style="padding:14px;"><div class="stat-label">إجمالي المصروفات</div><div class="stat-value" id="detailTotalExpenses" style="font-size:1.2rem;">-</div></div>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="expensesTab">المصروفات</button>
+        <button class="tab-btn" data-tab="advanceTab">تعديل العهدة</button>
+      </div>
+      <div class="tab-content active" id="expensesTab">
+        <div style="margin-bottom:12px;"><button class="btn btn-outline btn-sm" id="exportSingleBtn">⬇ تصدير مصروفات هذا الفرع (إكسل)</button></div>
+        <div class="table-wrapper" style="max-height:300px; overflow-y:auto;">
+          <table>
+            <thead><tr><th>التاريخ</th><th>الوصف</th><th>التصنيف</th><th>المبلغ</th></tr></thead>
+            <tbody id="detailExpensesBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tab-content" id="advanceTab">
+        <form id="advanceForm">
+          <div class="form-group">
+            <label>طريقة التعديل</label>
+            <select id="advanceMode">
+              <option value="set">تحديد قيمة العهدة مباشرة (استبدال)</option>
+              <option value="add">إضافة / خصم مبلغ من العهدة الحالية</option>
+            </select>
+          </div>
+          <div class="form-group"><label id="advanceAmountLabel">القيمة الجديدة للعهدة</label><input type="number" id="advanceAmount" step="0.01" required></div>
+          <div class="form-group"><label>ملاحظة (اختياري)</label><input type="text" id="advanceNote" placeholder="مثال: عهدة شهر يوليو"></div>
+          <button type="submit" class="btn btn-accent btn-block">تنفيذ التعديل</button>
+        </form>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn btn-outline" id="closeBranchDetailBtn">إغلاق</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="view-branch" class="view">
+  <div id="branchHeader"></div>
+  <div class="container">
+    <h1 class="page-title" id="pageTitleText">مصروفات الفرع</h1>
+    <div class="stats-grid">
+      <div class="stat-card accent"><div class="stat-label">رصيد العهدة المتاح</div><div class="stat-value" id="statBalance">-</div></div>
+      <div class="stat-card danger"><div class="stat-label">إجمالي المصروفات المسجّلة</div><div class="stat-value" id="statTotalExpensesBranch">-</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>تسجيل مصروف جديد</h3></div>
+      <div id="expenseAlert"></div>
+      <form id="expenseForm">
+        <div class="form-row">
+          <div class="form-group"><label>المبلغ</label><input type="number" id="amount" step="0.01" min="0.01" required placeholder="0.00"></div>
+          <div class="form-group"><label>تاريخ المصروف</label><input type="date" id="expense_date" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>الوصف</label><input type="text" id="description" required placeholder="مثال: شراء أدوات مكتبية"></div>
+          <div class="form-group"><label>التصنيف (اختياري)</label><input type="text" id="category" placeholder="مثال: صيانة، مكتبية، تشغيل"></div>
+        </div>
+        <button type="submit" class="btn btn-accent" id="submitExpenseBtn">+ تسجيل المصروف</button>
+      </form>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>سجل المصروفات</h3></div>
+      <div id="listAlert"></div>
+      <div id="expensesTableWrapper" class="table-wrapper"><div class="loader">جاري التحميل...</div></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="editExpenseModal">
+    <div class="modal-box">
+      <h3>تعديل المصروف</h3>
+      <div id="editExpenseAlert"></div>
+      <form id="editExpenseForm">
+        <input type="hidden" id="editExpenseId">
+        <div class="form-group"><label>المبلغ</label><input type="number" id="editAmount" step="0.01" min="0.01" required></div>
+        <div class="form-group"><label>تاريخ المصروف</label><input type="date" id="editExpenseDate" required></div>
+        <div class="form-group"><label>الوصف</label><input type="text" id="editDescription" required></div>
+        <div class="form-group"><label>التصنيف (اختياري)</label><input type="text" id="editCategory"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="closeEditExpenseBtn">إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ التعديل</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="changePasswordModal">
+  <div class="modal-box">
+    <h3>تغيير كلمة المرور</h3>
+    <div id="cpAlert"></div>
+    <form id="changePasswordForm">
+      <div class="form-group"><label>كلمة المرور الحالية</label><input type="password" id="cpCurrent" required></div>
+      <div class="form-group"><label>كلمة المرور الجديدة</label><input type="password" id="cpNew" required minlength="6"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="closeCpModalBtn">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDT_fPOHGv2D_2ZCZ1hVx0E6z_K1DL73fk",
+  authDomain: "cash-advance-fc5ed.firebaseapp.com",
+  projectId: "cash-advance-fc5ed",
+  storageBucket: "cash-advance-fc5ed.firebasestorage.app",
+  messagingSenderId: "687565984608",
+  appId: "1:687565984608:web:e3772f6a8b1dfecfefc405"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
+const secondaryAuth = secondaryApp.auth();
+
+function formatCurrency(num) {
+  return new Intl.NumberFormat('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num || 0);
+}
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  const d = (dateStr instanceof Date) ? dateStr : new Date(dateStr);
+  return d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+function showAlert(containerId, message, type) {
+  type = type || 'error';
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = '<div class="alert alert-' + type + '">' + escapeHtml(message) + '</div>';
+  if (type === 'success') setTimeout(function () { c.innerHTML = ''; }, 4000);
+}
+function clearAlert(containerId) {
+  const c = document.getElementById(containerId);
+  if (c) c.innerHTML = '';
+}
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+function roleLabel(role) {
+  const map = { admin: 'أدمن النظام', general_manager: 'مدير عام', branch: 'فرع' };
+  return map[role] || role;
+}
+function translateFirebaseError(err) {
+  const code = err && err.code ? err.code : '';
+  const map = {
+    'auth/invalid-email': 'البريد الإلكتروني غير صالح',
+    'auth/user-disabled': 'هذا الحساب معطّل',
+    'auth/user-not-found': 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+    'auth/wrong-password': 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+    'auth/invalid-login-credentials': 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+    'auth/invalid-credential': 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+    'auth/email-already-in-use': 'هذا البريد الإلكتروني مستخدم من قبل',
+    'auth/weak-password': 'كلمة المرور ضعيفة، يجب أن تكون 6 أحرف على الأقل',
+    'auth/too-many-requests': 'تم حظر المحاولات مؤقتاً بسبب تكرار الخطأ، حاول لاحقاً',
+    'auth/network-request-failed': 'تعذر الاتصال بالخادم، تحقق من الإنترنت',
+    'permission-denied': 'لا تملك الصلاحية لتنفيذ هذا الإجراء'
+  };
+  return map[code] || (err && err.message) || 'حدث خطأ غير متوقع';
+}
+
+function showView(viewId) {
+  const views = document.querySelectorAll('.view');
+  for (let i = 0; i < views.length; i++) views[i].classList.remove('active');
+  document.getElementById('initialLoader').style.display = 'none';
+  document.getElementById(viewId).classList.add('active');
+}
+
+function renderHeader(containerId, pageTitle, userData) {
+  const container = document.getElementById(containerId);
+  container.innerHTML =
+    '<header class="app-header">' +
+      '<div class="brand">' + escapeHtml(pageTitle) + '</div>' +
+      '<div class="user-info">' +
+        '<span>' + escapeHtml(userData.full_name) + '</span>' +
+        '<span class="role-badge">' + roleLabel(userData.role) + '</span>' +
+        '<button class="btn btn-outline btn-sm" data-action="changePassword" style="background:#fff;">تغيير كلمة المرور</button>' +
+        '<button class="btn btn-danger btn-sm" data-action="logout">تسجيل الخروج</button>' +
+      '</div>' +
+    '</header>';
+  container.querySelector('[data-action="logout"]').addEventListener('click', async function () {
+    await auth.signOut();
+    showView('view-login');
+  });
+  container.querySelector('[data-action="changePassword"]').addEventListener('click', openChangePasswordModal);
+}
+
+function openChangePasswordModal() {
+  document.getElementById('changePasswordForm').reset();
+  clearAlert('cpAlert');
+  document.getElementById('changePasswordModal').classList.add('active');
+}
+function closeChangePasswordModal() {
+  document.getElementById('changePasswordModal').classList.remove('active');
+}
+document.getElementById('closeCpModalBtn').addEventListener('click', closeChangePasswordModal);
+document.getElementById('changePasswordForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  clearAlert('cpAlert');
+  const currentPassword = document.getElementById('cpCurrent').value;
+  const newPassword = document.getElementById('cpNew').value;
+  try {
+    const user = auth.currentUser;
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPassword);
+    await user.reauthenticateWithCredential(credential);
+    await user.updatePassword(newPassword);
+    showAlert('cpAlert', 'تم تغيير كلمة المرور بنجاح', 'success');
+    setTimeout(closeChangePasswordModal, 1200);
+  } catch (err) {
+    showAlert('cpAlert', translateFirebaseError(err));
+  }
+});
+
+let currentUserData = null;
+
+auth.onAuthStateChanged(async function (firebaseUser) {
+  showDebug('onAuthStateChanged fired. User: ' + (firebaseUser ? firebaseUser.email : 'null'));
+  if (!firebaseUser) {
+    showView('view-login');
+    return;
+  }
+  try {
+    showDebug('Fetching user doc for uid: ' + firebaseUser.uid);
+    const userDoc = await db.collection('users').doc(firebaseUser.uid).get();
+    showDebug('User doc exists: ' + userDoc.exists);
+    if (!userDoc.exists) {
+      await auth.signOut();
+      showView('view-login');
+      return;
+    }
+    const userData = userDoc.data();
+    showDebug('User role: ' + userData.role + ' | is_active: ' + userData.is_active);
+    if (userData.is_active === false) {
+      await auth.signOut();
+      showAlert('loginAlert', 'هذا الحساب معطّل، تواصل مع الأدمن');
+      showView('view-login');
+      return;
+    }
+    currentUserData = Object.assign({ uid: firebaseUser.uid }, userData);
+
+    if (userData.role === 'admin') {
+      showView('view-admin');
+      renderHeader('adminHeader', 'لوحة تحكم الأدمن', currentUserData);
+      initAdminPage();
+    } else if (userData.role === 'general_manager') {
+      showView('view-manager');
+      renderHeader('managerHeader', 'لوحة المدير العام', currentUserData);
+      initManagerPage();
+    } else if (userData.role === 'branch') {
+      showView('view-branch');
+      renderHeader('branchHeader', 'لوحة الفرع', currentUserData);
+      initBranchPage();
+    } else {
+      showView('view-login');
+    }
+  } catch (err) {
+    showDebug('CATCH ERROR: ' + err.message + (err.code ? ' | Code: ' + err.code : ''));
+    console.error(err);
+    showView('view-login');
+  }
+});
+
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  clearAlert('loginAlert');
+  showDebug('Login form submitted.');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = 'جاري تسجيل الدخول...';
+  try {
+    showDebug('Calling signInWithEmailAndPassword for: ' + email);
+    await auth.signInWithEmailAndPassword(email, password);
+    showDebug('signInWithEmailAndPassword succeeded.');
+  } catch (err) {
+    showDebug('LOGIN ERROR: ' + err.message + (err.code ? ' | Code: ' + err.code : ''));
+    showAlert('loginAlert', translateFirebaseError(err));
+    btn.disabled = false;
+    btn.textContent = 'تسجيل الدخول';
+  }
+});
+
+let allUsersData = [];
+let generalManagers = [];
+let adminPageInitialized = false;
+
+function initAdminPage() {
+  loadManagers();
+  loadUsers();
+  if (adminPageInitialized) return;
+  adminPageInitialized = true;
+
+  const createModal = document.getElementById('createModal');
+  document.getElementById('openCreateModalBtn').addEventListener('click', function () {
+    document.getElementById('createForm').reset();
+    document.getElementById('branchFields').style.display = 'none';
+    clearAlert('createAlert');
+    createModal.classList.add('active');
+  });
+  document.getElementById('closeCreateModalBtn').addEventListener('click', function () { createModal.classList.remove('active'); });
+  document.getElementById('role').addEventListener('change', function () {
+    document.getElementById('branchFields').style.display = this.value === 'branch' ? 'block' : 'none';
+  });
+
+  document.getElementById('createForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    clearAlert('createAlert');
+    const role = document.getElementById('role').value;
+    const full_name = document.getElementById('full_name').value.trim();
+    const email = document.getElementById('newEmail').value.trim();
+    const password = document.getElementById('newPassword').value;
+    let branch_name, manager_id, initial_advance;
+    if (role === 'branch') {
+      branch_name = document.getElementById('branch_name').value.trim();
+      manager_id = document.getElementById('manager_id').value || null;
+      initial_advance = parseFloat(document.getElementById('initial_advance').value) || 0;
+      if (!branch_name) { showAlert('createAlert', 'اسم الفرع مطلوب'); return; }
+    }
+    const btn = document.getElementById('createSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = 'جاري الإنشاء...';
+    try {
+      showDebug('STEP 1: Current admin uid (auth.currentUser): ' + (auth.currentUser ? auth.currentUser.uid : 'NULL'));
+      showDebug('STEP 2: Creating auth user via secondaryAuth for: ' + email);
+      const cred = await secondaryAuth.createUserWithEmailAndPassword(email, password);
+      const newUid = cred.user.uid;
+      showDebug('STEP 3: Auth user created. New UID: ' + newUid);
+      showDebug('STEP 4: admin uid still: ' + (auth.currentUser ? auth.currentUser.uid : 'NULL') + ' | secondaryAuth uid: ' + (secondaryAuth.currentUser ? secondaryAuth.currentUser.uid : 'NULL'));
+      showDebug('STEP 5: Writing users/' + newUid + ' doc...');
+      await db.collection('users').doc(newUid).set({
+        full_name: full_name, email: email, role: role, is_active: true,
+        created_at: firebase.firestore.FieldValue.serverTimestamp(),
+        created_by: currentUserData.uid
+      });
+      showDebug('STEP 6: users doc written successfully.');
+      if (role === 'branch') {
+        showDebug('STEP 7: Writing branches doc...');
+        const branchRef = await db.collection('branches').add({
+          user_id: newUid, branch_name: branch_name, manager_id: manager_id || null,
+          advance_balance: initial_advance,
+          created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showDebug('STEP 8: branches doc written. ID: ' + branchRef.id);
+        if (initial_advance > 0) {
+          await db.collection('advanceTransactions').add({
+            branch_id: branchRef.id, amount: initial_advance, type: 'credit',
+            note: 'عهدة افتتاحية عند إنشاء الفرع', performed_by: currentUserData.uid,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showDebug('STEP 9: advanceTransactions doc written.');
+        }
+      }
+      showDebug('STEP 10: Signing out secondaryAuth...');
+      await secondaryAuth.signOut();
+      showDebug('STEP 11: All done successfully!');
+      createModal.classList.remove('active');
+      await loadManagers();
+      await loadUsers();
+    } catch (err) {
+      showDebug('CREATE USER ERROR at some step: ' + err.message + (err.code ? ' | Code: ' + err.code : ''));
+      showAlert('createAlert', translateFirebaseError(err));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'إنشاء الحساب';
+    }
+  });
+
+  const editModal = document.getElementById('editModal');
+  document.getElementById('closeEditModalBtn').addEventListener('click', function () { editModal.classList.remove('active'); });
+
+  document.getElementById('editForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    clearAlert('editAlert');
+    const uid = document.getElementById('editUserId').value;
+    const user = allUsersData.find(function (u) { return u.uid === uid; });
+    const full_name = document.getElementById('editFullName').value.trim();
+    const is_active = document.getElementById('editIsActive').value === 'true';
+    try {
+      await db.collection('users').doc(uid).update({ full_name: full_name, is_active: is_active });
+      if (user.role === 'branch' && user.branchInfo) {
+        const branch_name = document.getElementById('editBranchName').value.trim();
+        const manager_id = document.getElementById('editManagerId').value || null;
+        await db.collection('branches').doc(user.branchInfo.id).update({ branch_name: branch_name, manager_id: manager_id });
+      }
+      editModal.classList.remove('active');
+      await loadUsers();
+    } catch (err) {
+      showAlert('editAlert', translateFirebaseError(err));
+    }
+  });
+
+  document.getElementById('deleteUserBtn').addEventListener('click', async function () {
+    const uid = document.getElementById('editUserId').value;
+    const user = allUsersData.find(function (u) { return u.uid === uid; });
+    if (!confirm('هل أنت متأكد من حذف حساب "' + user.full_name + '"؟ سيتم حذف بياناته من قاعدة البيانات.')) return;
+    try {
+      if (user.role === 'branch' && user.branchInfo) {
+        await db.collection('branches').doc(user.branchInfo.id).delete();
+      }
+      await db.collection('users').doc(uid).delete();
+      editModal.classList.remove('active');
+      await loadManagers();
+      await loadUsers();
+    } catch (err) {
+      showAlert('editAlert', translateFirebaseError(err));
+    }
+  });
+}
+
+async function loadUsers() {
+  try {
+    const usersSnap = await db.collection('users').get();
+    const branchesSnap = await db.collection('branches').get();
+    const branchesByUserId = {};
+    branchesSnap.forEach(function (doc) { branchesByUserId[doc.data().user_id] = Object.assign({ id: doc.id }, doc.data()); });
+    allUsersData = usersSnap.docs.map(function (doc) {
+      const u = Object.assign({ uid: doc.id }, doc.data());
+      if (u.role === 'branch' && branchesByUserId[u.uid]) u.branchInfo = branchesByUserId[u.uid];
+      return u;
+    });
+    allUsersData.forEach(function (u) {
+      if (u.branchInfo && u.branchInfo.manager_id) {
+        const manager = allUsersData.find(function (m) { return m.uid === u.branchInfo.manager_id; });
+        u.branchInfo.manager_name = manager ? manager.full_name : null;
+      }
+    });
+    renderAdminStats();
+    renderUsersTable();
+  } catch (err) {
+    showAlert('usersAlert', translateFirebaseError(err));
+  }
+}
+
+async function loadManagers() {
+  try {
+    const snap = await db.collection('users').where('role', '==', 'general_manager').get();
+    generalManagers = snap.docs.map(function (doc) { return Object.assign({ uid: doc.id }, doc.data()); });
+    [document.getElementById('manager_id'), document.getElementById('editManagerId')].forEach(function (sel) {
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">بدون تحديد</option>' +
+        generalManagers.map(function (m) { return '<option value="' + m.uid + '">' + escapeHtml(m.full_name) + '</option>'; }).join('');
+      sel.value = cur;
+    });
+  } catch (e) {}
+}
+
+function renderAdminStats() {
+  const managers = allUsersData.filter(function (u) { return u.role === 'general_manager'; });
+  const branchesArr = allUsersData.filter(function (u) { return u.role === 'branch'; });
+  const totalAdvance = branchesArr.reduce(function (s, b) { return s + (b.branchInfo ? b.branchInfo.advance_balance : 0); }, 0);
+  document.getElementById('statManagers').textContent = managers.length;
+  document.getElementById('statBranches').textContent = branchesArr.length;
+  document.getElementById('statTotalAdvance').textContent = formatCurrency(totalAdvance);
+}
+
+function renderUsersTable() {
+  const wrapper = document.getElementById('usersTableWrapper');
+  if (allUsersData.length === 0) { wrapper.innerHTML = '<div class="empty-state">لا توجد حسابات بعد</div>'; return; }
+  const rows = allUsersData.map(function (u) {
+    const roleClass = u.role === 'admin' ? 'badge-role-admin' : u.role === 'general_manager' ? 'badge-role-manager' : 'badge-role-branch';
+    const statusBadge = (u.is_active !== false) ? '<span class="badge badge-active">مفعّل</span>' : '<span class="badge badge-inactive">معطّل</span>';
+    const extraInfo = u.role === 'branch' && u.branchInfo
+      ? escapeHtml(u.branchInfo.branch_name || '-') + ' ' + (u.branchInfo.manager_name ? '(تحت إدارة: ' + escapeHtml(u.branchInfo.manager_name) + ')' : '') : '-';
+    const balance = u.role === 'branch' && u.branchInfo ? formatCurrency(u.branchInfo.advance_balance) + ' ج.م' : '-';
+    const actionBtn = u.role === 'admin' ? '<span class="text-muted">—</span>' : '<button class="btn btn-outline btn-sm" onclick="openEditModal(\'' + u.uid + '\')">تعديل</button>';
+    return '<tr><td>' + escapeHtml(u.full_name) + '</td><td>' + escapeHtml(u.email) + '</td><td><span class="badge ' + roleClass + '">' + roleLabel(u.role) + '</span></td><td>' + extraInfo + '</td><td>' + balance + '</td><td>' + statusBadge + '</td><td>' + actionBtn + '</td></tr>';
+  }).join('');
+  wrapper.innerHTML = '<table><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الدور</th><th>تفاصيل إضافية</th><th>رصيد العهدة</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function openEditModal(uid) {
+  const user = allUsersData.find(function (u) { return u.uid === uid; });
+  if (!user) return;
+  clearAlert('editAlert');
+  document.getElementById('editUserId').value = user.uid;
+  document.getElementById('editFullName').value = user.full_name;
+  document.getElementById('editIsActive').value = (user.is_active !== false) ? 'true' : 'false';
+  const isBranch = user.role === 'branch';
+  document.getElementById('editBranchNameGroup').style.display = isBranch ? 'block' : 'none';
+  document.getElementById('editManagerGroup').style.display = isBranch ? 'block' : 'none';
+  if (isBranch && user.branchInfo) {
+    document.getElementById('editBranchName').value = user.branchInfo.branch_name || '';
+    document.getElementById('editManagerId').value = user.branchInfo.manager_id || '';
+  }
+  document.getElementById('editModalTitle').textContent = 'تعديل حساب: ' + user.full_name;
+  document.getElementById('editModal').classList.add('active');
+}
+
+let branches = [];
+let currentBranchId = null;
+let currentBranchExpenses = [];
+let managerPageInitialized = false;
+
+function initManagerPage() {
+  loadBranches();
+  if (managerPageInitialized) return;
+  managerPageInitialized = true;
+
+  document.getElementById('closeBranchDetailBtn').addEventListener('click', function () {
+    document.getElementById('branchDetailModal').classList.remove('active');
+  });
+  document.querySelectorAll('#view-manager .tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('#view-manager .tab-btn').forEach(function (b) { b.classList.remove('active'); });
+      document.querySelectorAll('#view-manager .tab-content').forEach(function (c) { c.classList.remove('active'); });
+      this.classList.add('active');
+      document.getElementById(this.dataset.tab).classList.add('active');
+    });
+  });
+  document.getElementById('advanceMode').addEventListener('change', function () {
+    document.getElementById('advanceAmountLabel').textContent = this.value === 'set' ? 'القيمة الجديدة للعهدة' : 'المبلغ المُضاف (سالب للخصم)';
+  });
+
+  document.getElementById('advanceForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    clearAlert('branchDetailAlert');
+    const mode = document.getElementById('advanceMode').value;
+    const inputAmount = parseFloat(document.getElementById('advanceAmount').value);
+    const note = document.getElementById('advanceNote').value.trim();
+    if (isNaN(inputAmount)) { showAlert('branchDetailAlert', 'المبلغ غير صالح'); return; }
+    try {
+      const branchRef = db.collection('branches').doc(currentBranchId);
+      await db.runTransaction(async function (transaction) {
+        const branchSnap = await transaction.get(branchRef);
+        if (!branchSnap.exists) throw new Error('الفرع غير موجود');
+        const currentBalance = branchSnap.data().advance_balance;
+        let newBalance, transactionAmount;
+        if (mode === 'set') { newBalance = inputAmount; transactionAmount = inputAmount - currentBalance; }
+        else { newBalance = currentBalance + inputAmount; transactionAmount = inputAmount; }
+        if (newBalance < 0) throw new Error('لا يمكن أن يكون رصيد العهدة سالباً');
+        transaction.update(branchRef, { advance_balance: newBalance });
+        const txRef = db.collection('advanceTransactions').doc();
+        transaction.set(txRef, {
+          branch_id: currentBranchId, amount: transactionAmount, type: 'credit',
+          note: note || 'تعديل قيمة العهدة', performed_by: currentUserData.uid,
+          created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      });
+      showAlert('branchDetailAlert', 'تم تحديث قيمة العهدة بنجاح', 'success');
+      await loadBranches();
+      await openBranchDetail(currentBranchId);
+    } catch (err) {
+      showAlert('branchDetailAlert', err.code ? translateFirebaseError(err) : err.message);
+    }
+  });
+
+  document.getElementById('exportSingleBtn').addEventListener('click', function () {
+    const btn = this;
+    btn.disabled = true;
+    btn.textContent = 'جاري التصدير...';
+    try {
+      const branch = branches.find(function (b) { return b.id === currentBranchId; });
+      const sortedExpenses = currentBranchExpenses.slice().sort(function (a, b) { return (a.expense_date > b.expense_date ? 1 : -1); });
+      const sheetData = buildExpensesSheetData(branch.branch_name, branch.advance_balance, sortedExpenses);
+      const ws = XLSX.utils.aoa_to_sheet(sheetData);
+      ws['!cols'] = [{ wch: 6 }, { wch: 16 }, { wch: 40 }, { wch: 18 }, { wch: 14 }];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, branch.branch_name.substring(0, 28));
+      XLSX.writeFile(wb, 'مصروفات_' + branch.branch_name + '.xlsx');
+    } catch (err) {
+      showAlert('branchDetailAlert', err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '⬇ تصدير مصروفات هذا الفرع (إكسل)';
+    }
+  });
+
+  document.getElementById('exportAllBtn').addEventListener('click', async function () {
+    const btn = this;
+    btn.disabled = true;
+    btn.textContent = 'جاري التصدير...';
+    try {
+      const wb = XLSX.utils.book_new();
+      const summaryRows = [['الفرع', 'إجمالي المصروفات', 'رصيد العهدة الحالي']];
+      let grandExpenses = 0, grandBalance = 0;
+      const allExpensesData = {};
+      for (const branch of branches) {
+        const expensesSnap = await db.collection('expenses').where('branch_id', '==', branch.id).orderBy('expense_date', 'asc').get();
+        allExpensesData[branch.id] = expensesSnap.docs.map(function (d) { return d.data(); });
+      }
+      branches.forEach(function (branch) {
+        const expenses = allExpensesData[branch.id] || [];
+        const branchTotal = expenses.reduce(function (s, e) { return s + e.amount; }, 0);
+        grandExpenses += branchTotal;
+        grandBalance += branch.advance_balance;
+        summaryRows.push([branch.branch_name, branchTotal, branch.advance_balance]);
+      });
+      summaryRows.push([]);
+      summaryRows.push(['الإجمالي العام', grandExpenses, grandBalance]);
+      const summarySheet = XLSX.utils.aoa_to_sheet(summaryRows);
+      summarySheet['!cols'] = [{ wch: 25 }, { wch: 20 }, { wch: 20 }];
+      XLSX.utils.book_append_sheet(wb, summarySheet, 'ملخص عام');
+      branches.forEach(function (branch) {
+        const expenses = allExpensesData[branch.id] || [];
+        const sheetData = buildExpensesSheetData(branch.branch_name, branch.advance_balance, expenses);
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+        ws['!cols'] = [{ wch: 6 }, { wch: 16 }, { wch: 40 }, { wch: 18 }, { wch: 14 }];
+        XLSX.utils.book_append_sheet(wb, ws, branch.branch_name.substring(0, 28));
+      });
+      XLSX.writeFile(wb, 'تقرير_مجمع_لكل_الفروع.xlsx');
+    } catch (err) {
+      showAlert('branchesAlert', err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '⬇ تصدير تقرير مجمّع لكل الفروع';
+    }
+  });
+}
+
+async function loadBranches() {
+  try {
+    const branchesSnap = await db.collection('branches').get();
+    const usersSnap = await db.collection('users').get();
+    const usersById = {};
+    usersSnap.forEach(function (doc) { usersById[doc.id] = doc.data(); });
+    branches = [];
+    for (const doc of branchesSnap.docs) {
+      const b = doc.data();
+      const branchUser = usersById[b.user_id] || {};
+      const expensesSnap = await db.collection('expenses').where('branch_id', '==', doc.id).get();
+      let totalExpenses = 0;
+      expensesSnap.forEach(function (e) { totalExpenses += e.data().amount; });
+      branches.push({
+        id: doc.id, branch_name: b.branch_name, advance_balance: b.advance_balance,
+        branch_user_name: branchUser.full_name || '-', is_active: branchUser.is_active !== false,
+        total_expenses: totalExpenses
+      });
+    }
+    branches.sort(function (a, b) { return a.branch_name.localeCompare(b.branch_name, 'ar'); });
+    renderManagerStats();
+    renderBranchesTable();
+  } catch (err) {
+    showAlert('branchesAlert', translateFirebaseError(err));
+  }
+}
+
+function renderManagerStats() {
+  const totalBalance = branches.reduce(function (s, b) { return s + b.advance_balance; }, 0);
+  const totalExpenses = branches.reduce(function (s, b) { return s + b.total_expenses; }, 0);
+  document.getElementById('statBranchCount').textContent = branches.length;
+  document.getElementById('statTotalBalance').textContent = formatCurrency(totalBalance) + ' ج.م';
+  document.getElementById('statTotalExpenses').textContent = formatCurrency(totalExpenses) + ' ج.م';
+}
+
+function renderBranchesTable() {
+  const wrapper = document.getElementById('branchesTableWrapper');
+  if (branches.length === 0) { wrapper.innerHTML = '<div class="empty-state">لا توجد فروع مسجّلة بعد</div>'; return; }
+  const rows = branches.map(function (b) {
+    const statusBadge = b.is_active ? '<span class="badge badge-active">مفعّل</span>' : '<span class="badge badge-inactive">معطّل</span>';
+    return '<tr><td>' + escapeHtml(b.branch_name) + '</td><td>' + escapeHtml(b.branch_user_name) + '</td><td>' + formatCurrency(b.advance_balance) + ' ج.م</td><td>' + formatCurrency(b.total_expenses) + ' ج.م</td><td>' + statusBadge + '</td><td><button class="btn btn-outline btn-sm" onclick="openBranchDetail(\'' + b.id + '\')">عرض التفاصيل</button></td></tr>';
+  }).join('');
+  wrapper.innerHTML = '<table><thead><tr><th>اسم الفرع</th><th>مسؤول الفرع</th><th>رصيد العهدة</th><th>إجمالي المصروفات</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+async function openBranchDetail(branchId) {
+  currentBranchId = branchId;
+  clearAlert('branchDetailAlert');
+  document.getElementById('branchDetailModal').classList.add('active');
+  document.querySelectorAll('#view-manager .tab-btn').forEach(function (b) { b.classList.remove('active'); });
+  document.querySelectorAll('#view-manager .tab-content').forEach(function (c) { c.classList.remove('active'); });
+  document.querySelector('#view-manager [data-tab="expensesTab"]').classList.add('active');
+  document.getElementById('expensesTab').classList.add('active');
+  try {
+    const branchDoc = await db.collection('branches').doc(branchId).get();
+    const branch = branchDoc.data();
+    const expensesSnap = await db.collection('expenses').where('branch_id', '==', branchId).orderBy('expense_date', 'desc').get();
+    currentBranchExpenses = expensesSnap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+    document.getElementById('branchDetailTitle').textContent = 'تفاصيل: ' + branch.branch_name;
+    document.getElementById('detailBalance').textContent = formatCurrency(branch.advance_balance) + ' ج.م';
+    const totalExpenses = currentBranchExpenses.reduce(function (s, e) { return s + e.amount; }, 0);
+    document.getElementById('detailTotalExpenses').textContent = formatCurrency(totalExpenses) + ' ج.م';
+    const body = document.getElementById('detailExpensesBody');
+    if (currentBranchExpenses.length === 0) {
+      body.innerHTML = '<tr><td colspan="4" class="text-center text-muted">لا توجد مصروفات مسجّلة</td></tr>';
+    } else {
+      body.innerHTML = currentBranchExpenses.map(function (e) {
+        return '<tr><td>' + formatDate(e.expense_date) + '</td><td>' + escapeHtml(e.description) + '</td><td>' + escapeHtml(e.category || '-') + '</td><td class="text-danger">' + formatCurrency(e.amount) + ' ج.م</td></tr>';
+      }).join('');
+    }
+    document.getElementById('advanceMode').value = 'set';
+    document.getElementById('advanceAmount').value = '';
+    document.getElementById('advanceNote').value = '';
+    document.getElementById('advanceAmountLabel').textContent = 'القيمة الجديدة للعهدة';
+  } catch (err) {
+    showAlert('branchDetailAlert', translateFirebaseError(err));
+  }
+}
+
+function buildExpensesSheetData(branchName, balance, expenses) {
+  const rows = [['م', 'تاريخ المصروف', 'الوصف', 'التصنيف', 'المبلغ']];
+  let total = 0;
+  expenses.forEach(function (e, i) { rows.push([i + 1, e.expense_date, e.description, e.category || '-', e.amount]); total += e.amount; });
+  rows.push([]);
+  rows.push(['', '', '', 'إجمالي المصروفات', total]);
+  rows.push(['', '', '', 'الرصيد الحالي للعهدة', balance]);
+  return rows;
+}
+
+let myBranchId = null;
+let currentExpenses = [];
+let branchPageInitialized = false;
+
+function initBranchPage() {
+  document.getElementById('expense_date').valueAsDate = new Date();
+  loadBranchData();
+  if (branchPageInitialized) return;
+  branchPageInitialized = true;
+
+  document.getElementById('expenseForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    clearAlert('expenseAlert');
+    const amount = parseFloat(document.getElementById('amount').value);
+    const expense_date = document.getElementById('expense_date').value;
+    const description = document.getElementById('description').value.trim();
+    const category = document.getElementById('category').value.trim();
+    if (isNaN(amount) || amount <= 0) { showAlert('expenseAlert', 'المبلغ يجب أن يكون رقماً أكبر من صفر'); return; }
+    const btn = document.getElementById('submitExpenseBtn');
+    btn.disabled = true;
+    try {
+      const branchRef = db.collection('branches').doc(myBranchId);
+      await db.runTransaction(async function (transaction) {
+        const branchSnap = await transaction.get(branchRef);
+        if (!branchSnap.exists) throw new Error('الفرع غير موجود');
+        const currentBalance = branchSnap.data().advance_balance;
+        if (amount > currentBalance) throw new Error('المبلغ المطلوب (' + amount + ') أكبر من رصيد العهدة المتاح (' + currentBalance + ')');
+        const expenseRef = db.collection('expenses').doc();
+        transaction.set(expenseRef, {
+          branch_id: myBranchId, amount: amount, description: description, category: category || null, expense_date: expense_date,
+          created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        transaction.update(branchRef, { advance_balance: currentBalance - amount });
+      });
+      showAlert('expenseAlert', 'تم تسجيل المصروف بنجاح وخصمه من العهدة', 'success');
+      document.getElementById('expenseForm').reset();
+      document.getElementById('expense_date').valueAsDate = new Date();
+      await loadBranchData();
+    } catch (err) {
+      showAlert('expenseAlert', err.code ? translateFirebaseError(err) : err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('closeEditExpenseBtn').addEventListener('click', function () { document.getElementById('editExpenseModal').classList.remove('active'); });
+
+  document.getElementById('editExpenseForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    clearAlert('editExpenseAlert');
+    const id = document.getElementById('editExpenseId').value;
+    const newAmount = parseFloat(document.getElementById('editAmount').value);
+    const expense_date = document.getElementById('editExpenseDate').value;
+    const description = document.getElementById('editDescription').value.trim();
+    const category = document.getElementById('editCategory').value.trim();
+    if (isNaN(newAmount) || newAmount <= 0) { showAlert('editExpenseAlert', 'المبلغ يجب أن يكون رقماً أكبر من صفر'); return; }
+    try {
+      const branchRef = db.collection('branches').doc(myBranchId);
+      const expenseRef = db.collection('expenses').doc(id);
+      await db.runTransaction(async function (transaction) {
+        const branchSnap = await transaction.get(branchRef);
+        const expenseSnap = await transaction.get(expenseRef);
+        if (!expenseSnap.exists) throw new Error('المصروف غير موجود');
+        const oldAmount = expenseSnap.data().amount;
+        const currentBalance = branchSnap.data().advance_balance;
+        const diff = newAmount - oldAmount;
+        if (diff > currentBalance) throw new Error('لا يوجد رصيد كافٍ في العهدة لتعديل هذا المصروف بالمبلغ الجديد');
+        transaction.update(expenseRef, { amount: newAmount, expense_date: expense_date, description: description, category: category || null });
+        transaction.update(branchRef, { advance_balance: currentBalance - diff });
+      });
+      document.getElementById('editExpenseModal').classList.remove('active');
+      await loadBranchData();
+    } catch (err) {
+      showAlert('editExpenseAlert', err.code ? translateFirebaseError(err) : err.message);
+    }
+  });
+}
+
+async function loadBranchData() {
+  try {
+    const branchSnap = await db.collection('branches').where('user_id', '==', currentUserData.uid).limit(1).get();
+    if (branchSnap.empty) {
+      showAlert('listAlert', 'لا يوجد فرع مرتبط بهذا الحساب، تواصل مع الأدمن');
+      return;
+    }
+    const branchDoc = branchSnap.docs[0];
+    myBranchId = branchDoc.id;
+    const branch = branchDoc.data();
+    const expensesSnap = await db.collection('expenses').where('branch_id', '==', myBranchId).orderBy('expense_date', 'desc').get();
+    currentExpenses = expensesSnap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+    const totalExpenses = currentExpenses.reduce(function (s, e) { return s + e.amount; }, 0);
+    document.getElementById('pageTitleText').textContent = 'مصروفات: ' + branch.branch_name;
+    document.getElementById('statBalance').textContent = formatCurrency(branch.advance_balance) + ' ج.م';
+    document.getElementById('statTotalExpensesBranch').textContent = formatCurrency(totalExpenses) + ' ج.م';
+    renderExpensesTable();
+  } catch (err) {
+    showAlert('listAlert', translateFirebaseError(err));
+  }
+}
+
+function renderExpensesTable() {
+  const wrapper = document.getElementById('expensesTableWrapper');
+  if (currentExpenses.length === 0) { wrapper.innerHTML = '<div class="empty-state">لم يتم تسجيل أي مصروفات بعد</div>'; return; }
+  const rows = currentExpenses.map(function (e) {
+    return '<tr>' +
+      '<td>' + formatDate(e.expense_date) + '</td><td>' + escapeHtml(e.description) + '</td><td>' + escapeHtml(e.category || '-') + '</td>' +
+      '<td class="text-danger">' + formatCurrency(e.amount) + ' ج.م</td>' +
+      '<td><div class="gap-2">' +
+        '<button class="btn btn-outline btn-sm" onclick="openEditExpense(\'' + e.id + '\')">تعديل</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="deleteExpense(\'' + e.id + '\')">حذف</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+  wrapper.innerHTML = '<table><thead><tr><th>التاريخ</th><th>الوصف</th><th>التصنيف</th><th>المبلغ</th><th>إجراءات</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function openEditExpense(id) {
+  const expense = currentExpenses.find(function (e) { return e.id === id; });
+  if (!expense) return;
+  clearAlert('editExpenseAlert');
+  document.getElementById('editExpenseId').value = expense.id;
+  document.getElementById('editAmount').value = expense.amount;
+  document.getElementById('editExpenseDate').value = expense.expense_date;
+  document.getElementById('editDescription').value = expense.description;
+  document.getElementById('editCategory').value = expense.category || '';
+  document.getElementById('editExpenseModal').classList.add('active');
+}
+
+async function deleteExpense(id) {
+  if (!confirm('هل أنت متأكد من حذف هذا المصروف؟ سيتم إرجاع المبلغ إلى رصيد العهدة.')) return;
+  try {
+    const branchRef = db.collection('branches').doc(myBranchId);
+    const expenseRef = db.collection('expenses').doc(id);
+    await db.runTransaction(async function (transaction) {
+      const branchSnap = await transaction.get(branchRef);
+      const expenseSnap = await transaction.get(expenseRef);
+      if (!expenseSnap.exists) throw new Error('المصروف غير موجود');
+      const amount = expenseSnap.data().amount;
+      const currentBalance = branchSnap.data().advance_balance;
+      transaction.delete(expenseRef);
+      transaction.update(branchRef, { advance_balance: currentBalance + amount });
+    });
+    await loadBranchData();
+  } catch (err) {
+    showAlert('listAlert', err.code ? translateFirebaseError(err) : err.message);
+  }
+}
+</script>
+</body>
+</html>
